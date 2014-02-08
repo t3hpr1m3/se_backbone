@@ -8,9 +8,8 @@ Vagrant.configure("2") do |config|
   config.hostmanager.manage_host = true
   config.ssh.forward_agent = true
 
-  config.vm.provider :virtualbox do |vb|
-    vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
-    vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
+  if Vagrant.has_plugin?('vagrant-cachier')
+    config.cache.auto_detect = true
   end
 
   config.vm.boot_timeout = 120
@@ -21,10 +20,10 @@ Vagrant.configure("2") do |config|
 
   couchPassword = 'Welcome1'
 
-  ipAddrPrefix = '10.11.12.1'
+  ipAddrPrefix = '10.11.12.'
   config.vm.define :app do |node|
     node.vm.box = 'precise64'
-    node.vm.network :private_network, ip: ipAddrPrefix + '0'
+    node.vm.network :private_network, ip: ipAddrPrefix + '10'
     node.vm.hostname = 'backbone-app'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
@@ -33,21 +32,48 @@ Vagrant.configure("2") do |config|
     end
   end
 
-  nodeCount = 3
-  1.upto(nodeCount) do |n|
-    nodeName = ("node" + n.to_s).to_sym
+  couchNodes = 2
+  1.upto(couchNodes) do |n|
+    nodeName = ("couch" + n.to_s).to_sym
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
-      node.vm.network :private_network, ip: ipAddrPrefix + n.to_s
-      node.vm.hostname = "#{nodeName}.couchbase.server"
+      node.vm.network :private_network, ip: ipAddrPrefix + '1' + n.to_s
+      node.vm.provider :virtualbox do |vb|
+        vb.memory = 1024
+      end
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
           'recipe[rails4_couchbase::db]'
         ]
         chef.json = {
-          "couchbase" => {
-            "server" => {
-              "password" => couchPassword
+          couchbase: {
+            server: {
+              password: couchPassword
+            }
+          }
+        }
+      end
+    end
+  end
+  elasticNodes = 2
+  1.upto(elasticNodes) do |n|
+    nodeName = ("elastic" + n.to_s).to_sym
+    config.vm.define nodeName do |node|
+      node.vm.box = 'precise64'
+      node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
+      node.vm.provision :chef_solo do |chef|
+        chef.run_list = [
+          'recipe[java]',
+          'recipe[elasticsearch]'
+        ]
+        chef.json = {
+          java: {
+            install_flavor: 'openjdk',
+            jdk_version: '7'
+          },
+          elasticsearch: {
+            cluster: {
+              name: 'se_backbone_es'
             }
           }
         }
