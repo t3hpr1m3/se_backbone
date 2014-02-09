@@ -25,7 +25,7 @@ Vagrant.configure("2") do |config|
   ipAddrPrefix = '10.11.12.'
   config.vm.define :app do |node|
     node.vm.box = 'precise64'
-    node.vm.hostname = hostname(nodeName) 
+    node.vm.hostname = hostname('app') 
     node.vm.network :private_network, ip: ipAddrPrefix + '10'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
