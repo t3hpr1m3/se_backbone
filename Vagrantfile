@@ -1,6 +1,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+def hostname(node)
+  "#{node.to_s}.smartengine.local"
+end
+
 Vagrant.configure("2") do |config|
 
   config.vm.box_url = "http://files.vagrantup.com/precise64.box"
@@ -18,11 +22,10 @@ Vagrant.configure("2") do |config|
 
   config.berkshelf.enabled = true
 
-  couchPassword = 'Welcome1'
-
   ipAddrPrefix = '10.11.12.'
   config.vm.define :app do |node|
     node.vm.box = 'precise64'
+    node.vm.hostname = hostname(nodeName) 
     node.vm.network :private_network, ip: ipAddrPrefix + '10'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
@@ -36,6 +39,7 @@ Vagrant.configure("2") do |config|
     nodeName = ("couch" + n.to_s).to_sym
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
+      node.vm.hostname = hostname(nodeName) 
       node.vm.network :private_network, ip: ipAddrPrefix + '1' + n.to_s
       node.vm.provider :virtualbox do |vb|
         vb.memory = 1024
@@ -44,13 +48,6 @@ Vagrant.configure("2") do |config|
         chef.run_list = [
           'recipe[smartengine::db]'
         ]
-        chef.json = {
-          couchbase: {
-            server: {
-              password: couchPassword
-            }
-          }
-        }
       end
     end
   end
@@ -59,6 +56,7 @@ Vagrant.configure("2") do |config|
     nodeName = ("elastic" + n.to_s).to_sym
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
+      node.vm.hostname = hostname(nodeName) 
       node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
