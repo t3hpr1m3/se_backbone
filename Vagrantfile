@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
     node.vm.hostname = 'backbone-app'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
-        'recipe[rails4_couchbase::app]'
+        'recipe[smartengine::app]'
       ]
     end
   end
@@ -43,7 +43,7 @@ Vagrant.configure("2") do |config|
       end
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
-          'recipe[rails4_couchbase::db]'
+          'recipe[smartengine::db]'
         ]
         chef.json = {
           couchbase: {
@@ -63,20 +63,8 @@ Vagrant.configure("2") do |config|
       node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
-          'recipe[java]',
-          'recipe[elasticsearch]'
+          'recipe[smartengine::search]'
         ]
-        chef.json = {
-          java: {
-            install_flavor: 'openjdk',
-            jdk_version: '7'
-          },
-          elasticsearch: {
-            cluster: {
-              name: 'se_backbone_es'
-            }
-          }
-        }
       end
     end
   end
