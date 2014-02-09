@@ -24,7 +24,6 @@ Vagrant.configure("2") do |config|
   config.vm.define :app do |node|
     node.vm.box = 'precise64'
     node.vm.network :private_network, ip: ipAddrPrefix + '10'
-    node.vm.hostname = 'backbone-app'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
         'recipe[smartengine::app]'
