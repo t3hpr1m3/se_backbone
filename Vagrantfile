@@ -29,6 +29,7 @@ Vagrant.configure("2") do |config|
     node.vm.network :private_network, ip: ipAddrPrefix + '10'
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
+        'recipe[smartengine::base]',
         'recipe[smartengine::app]'
       ]
     end
@@ -46,6 +47,7 @@ Vagrant.configure("2") do |config|
       end
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
+          'recipe[smartengine::base]',
           'recipe[smartengine::db]'
         ]
       end
@@ -58,8 +60,12 @@ Vagrant.configure("2") do |config|
       node.vm.box = 'precise64'
       node.vm.hostname = hostname(nodeName) 
       node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
+      node.vm.provider :virtualbox do |vb|
+        vb.memory = 1536
+      end
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
+          'recipe[smartengine::base]',
           'recipe[smartengine::search]'
         ]
       end
