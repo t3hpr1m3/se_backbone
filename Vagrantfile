@@ -16,6 +16,11 @@ Vagrant.configure("2") do |config|
     config.cache.auto_detect = true
   end
 
+  config.vm.provider :virtualbox do |vb|
+    vb.customize ['modifyvm', :id, '--natdnshostresolver1', 'on']
+    vb.customize ['modifyvm', :id, '--natdnsproxy1', 'on']
+  end
+
   config.vm.boot_timeout = 120
 
   config.omnibus.chef_version = :latest
@@ -30,7 +35,9 @@ Vagrant.configure("2") do |config|
     node.vm.provision :chef_solo do |chef|
       chef.run_list = [
         'recipe[smartengine::base]',
-        'recipe[smartengine::app]'
+        'recipe[smartengine::app]',
+        'recipe[smartengine::db_proxy]',
+        'recipe[smartengine::search_proxy]'
       ]
     end
   end
@@ -68,6 +75,13 @@ Vagrant.configure("2") do |config|
           'recipe[smartengine::base]',
           'recipe[smartengine::search]'
         ]
+        chef.json = {
+          'elasticsearch' => {
+            'network' => {
+              'publish_host' => ipAddrPrefix + '2' + n.to_s
+            }
+          } 
+        }
       end
     end
   end
