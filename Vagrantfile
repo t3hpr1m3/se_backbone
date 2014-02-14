@@ -79,7 +79,7 @@ Vagrant.configure("2") do |config|
         chef.json = {
           'elasticsearch' => {
             'network' => {
-              'publish_host' => ipAddrPrefix + '2' + n.to_s
+              'publish_host' => ipAddrPrefix + '3' + n.to_s
             }
           } 
         }
