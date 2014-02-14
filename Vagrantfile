@@ -49,7 +49,7 @@ Vagrant.configure("2") do |config|
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
       node.vm.hostname = hostname(nodeName) 
-      node.vm.network :private_network, ip: ipAddrPrefix + '1' + n.to_s
+      node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
       node.vm.provider :virtualbox do |vb|
         vb.memory = 1024
       end
@@ -67,7 +67,7 @@ Vagrant.configure("2") do |config|
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
       node.vm.hostname = hostname(nodeName) 
-      node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
+      node.vm.network :private_network, ip: ipAddrPrefix + '3' + n.to_s
       node.vm.provider :virtualbox do |vb|
         vb.memory = 1536
       end
