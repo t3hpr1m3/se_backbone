@@ -29,29 +29,36 @@ Vagrant.configure("2") do |config|
   config.berkshelf.enabled = true
 
   ipAddrPrefix = '10.11.12.'
-  config.vm.define :app do |node|
-    node.vm.box = 'precise64'
-    node.vm.hostname = hostname('app') 
-    node.vm.network :private_network, ip: ipAddrPrefix + '10'
-    node.vm.provision :chef_solo do |chef|
-      chef.run_list = [
-        'recipe[smartengine::base]',
-        'recipe[smartengine::app]',
-        'recipe[smartengine::db_proxy]',
-        'recipe[smartengine::search_proxy]'
-      ]
-    end
-  end
 
-  couchNodes = 2
+  #config.vm.define :app do |node|
+  #  node.vm.box = 'precise64'
+  #  node.vm.hostname = hostname('app') 
+  #  node.vm.network :private_network, ip: ipAddrPrefix + '10'
+  #  node.vm.provision :chef_solo do |chef|
+  #    chef.run_list = [
+  #      'recipe[smartengine::base]',
+  #      'recipe[smartengine::app]',
+  #      'recipe[smartengine::db_proxy]',
+  #      'recipe[smartengine::search_proxy]'
+  #    ]
+  #  end
+  #end
+
+  couchNodes = 1
   1.upto(couchNodes) do |n|
     nodeName = ("couch" + n.to_s).to_sym
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
       node.vm.hostname = hostname(nodeName) 
       node.vm.network :private_network, ip: ipAddrPrefix + '2' + n.to_s
+      if n.eql?(1)
+        node.vm.network :forwarded_port, guest: 8091, host: 8091
+        node.vm.network :forwarded_port, guest: 8092, host: 8092
+        node.vm.network :forwarded_port, guest: 11210, host: 11210
+        node.vm.network :forwarded_port, guest: 11211, host: 11211
+      end
       node.vm.provider :virtualbox do |vb|
-        vb.memory = 1024
+        vb.memory = 2048
       end
       node.vm.provision :chef_solo do |chef|
         chef.run_list = [
@@ -61,13 +68,14 @@ Vagrant.configure("2") do |config|
       end
     end
   end
-  elasticNodes = 2
+  elasticNodes = 1
   1.upto(elasticNodes) do |n|
     nodeName = ("elastic" + n.to_s).to_sym
     config.vm.define nodeName do |node|
       node.vm.box = 'precise64'
       node.vm.hostname = hostname(nodeName) 
       node.vm.network :private_network, ip: ipAddrPrefix + '3' + n.to_s
+      node.vm.network :forwarded_port, guest: 9200, host: 9200 + (n-1)
       node.vm.provider :virtualbox do |vb|
         vb.memory = 1536
       end
